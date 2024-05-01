@@ -5,9 +5,12 @@ from .serializers import ProductSerializer
 from .models import Product
 from rest_framework import status
 from rest_framework.views import APIView
+from rest_framework.permissions import IsAuthenticatedOrReadOnly
 
 
 class ProductListAPIView(APIView):
+    permission_classes = [IsAuthenticatedOrReadOnly]
+
     def get(self, request):
         products = Product.objects.all()
         serializer = ProductSerializer(products, many=True)
@@ -20,6 +23,8 @@ class ProductListAPIView(APIView):
             return Response(serializer.data, status=status.HTTP_201_CREATED)
 
 class ProductDetailAPIView(APIView):
+    permission_classes = [IsAuthenticatedOrReadOnly]
+
     def get_object(request, id):
         return get_object_or_404(Product, id=id)
 
@@ -28,7 +33,7 @@ class ProductDetailAPIView(APIView):
         serializer = ProductSerializer(product)
         return Response(serializer.data)
         
-    def put(self, reuqest, id):
+    def put(self, request, id):
         product = self.get_object(id)
         serializer = ProductSerializer(product, data=request.data, partial=True)
         if serializer.is_valid(raise_exception=True):
