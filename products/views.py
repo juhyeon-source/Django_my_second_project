@@ -4,36 +4,44 @@ from rest_framework.response import Response
 from .serializers import ProductSerializer
 from .models import Product
 from rest_framework import status
+from rest_framework.views import APIView
+from rest_framework.permissions import IsAuthenticatedOrReadOnly
 
 
+class ProductListAPIView(APIView):
+    permission_classes = [IsAuthenticatedOrReadOnly]
 
-@api_view(["GET","POST"])
-def product_list(request):
-    if request.method=="GET":
+    def get(self, request):
         products = Product.objects.all()
         serializer = ProductSerializer(products, many=True)
         return Response(serializer.data)
-    elif request.method=="POST":
+
+    def post(self, request):
         serializer = ProductSerializer(data=request.data)
-        if serializer.is_valid():
+        if serializer.is_valid(raise_exception=True):
             serializer.save()
             return Response(serializer.data, status=status.HTTP_201_CREATED)
 
-@api_view(["GET", "PUT", "DELETE"])
-def product_detail(request, id):
-    product = get_object_or_404(Product, id=id)
+class ProductDetailAPIView(APIView):
+    permission_classes = [IsAuthenticatedOrReadOnly]
 
-    if request.method == "GET":
+    def get_object(request, id):
+        return get_object_or_404(Product, id=id)
+
+    def get(self, request, id):
+        product = self.get_object(id)
         serializer = ProductSerializer(product)
         return Response(serializer.data)
-    
-    elif request.method == "PUT":
+        
+    def put(self, request, id):
+        product = self.get_object(id)
         serializer = ProductSerializer(product, data=request.data, partial=True)
         if serializer.is_valid(raise_exception=True):
             serializer.save()
             return Response(serializer.data)
-    
-    elif request.method == "DELETE":
+        
+    def delete(self, request, id):
+        product = self.get_object(id)
         product.delete()
         data = {"delete": f"Product({id}) is deleted."}
         return Response(data, status=status.HTTP_200_OK)
