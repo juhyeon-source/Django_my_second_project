@@ -27,7 +27,7 @@ DEBUG = True
 
 ALLOWED_HOSTS = []
 
-
+AUTH_USER_MODEL = "accounts.User"
 # Application definition
 
 INSTALLED_APPS = [
@@ -40,7 +40,7 @@ INSTALLED_APPS = [
     'products',
     'rest_framework',
     'django_extensions',
-    
+    'accounts',
 ]
 
 MIDDLEWARE = [
